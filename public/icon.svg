@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a1a1e"/>
+      <stop offset="100%" stop-color="#0a0a0c"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- ── Spider Web 🕸️ ── -->
+  <!-- Centre hub -->
+  <circle cx="256" cy="256" r="5" fill="#e0e0e0"/>
+
+  <!-- 8 Radial spokes -->
+  <g stroke="#d0d0d0" stroke-width="2.4" stroke-linecap="round" opacity="0.85">
+    <line x1="256" y1="256" x2="256" y2="62"/>
+    <line x1="256" y1="256" x2="393" y2="119"/>
+    <line x1="256" y1="256" x2="450" y2="256"/>
+    <line x1="256" y1="256" x2="393" y2="393"/>
+    <line x1="256" y1="256" x2="256" y2="450"/>
+    <line x1="256" y1="256" x2="119" y2="393"/>
+    <line x1="256" y1="256" x2="62" y2="256"/>
+    <line x1="256" y1="256" x2="119" y2="119"/>
+  </g>
+
+  <!-- Spiral/concentric rings connecting spokes (like a real web) -->
+  <g fill="none" stroke="#c8c8c8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+    <!-- Ring 1 — innermost (~35px from centre) -->
+    <path d="M256,221 L280,235 L280,277 L256,291 L232,277 L232,235 Z"/>
+
+    <!-- Ring 2 (~70px) -->
+    <path d="M256,186
+             L297,210
+             L312,256
+             L297,302
+             L256,326
+             L215,302
+             L200,256
+             L215,210 Z"/>
+
+    <!-- Ring 3 (~110px) -->
+    <path d="M256,146
+             L328,178
+             L362,256
+             L328,334
+             L256,366
+             L184,334
+             L150,256
+             L184,178 Z"/>
+
+    <!-- Ring 4 (~155px) -->
+    <path d="M256,101
+             L366,143
+             L414,256
+             L366,369
+             L256,411
+             L146,369
+             L98,256
+             L146,143 Z"/>
+
+    <!-- Ring 5 — outermost (~195px) -->
+    <path d="M256,68
+             L391,116
+             L445,256
+             L391,396
+             L256,444
+             L121,396
+             L67,256
+             L121,116 Z"/>
+  </g>
+
+  <!-- Small dots at spoke-ring intersections for detail -->
+  <g fill="#e0e0e0" opacity="0.5">
+    <!-- Ring 2 intersections -->
+    <circle cx="256" cy="186" r="2.5"/>
+    <circle cx="297" cy="210" r="2.5"/>
+    <circle cx="312" cy="256" r="2.5"/>
+    <circle cx="297" cy="302" r="2.5"/>
+    <circle cx="256" cy="326" r="2.5"/>
+    <circle cx="215" cy="302" r="2.5"/>
+    <circle cx="200" cy="256" r="2.5"/>
+    <circle cx="215" cy="210" r="2.5"/>
+
+    <!-- Ring 4 intersections -->
+    <circle cx="256" cy="101" r="2.5"/>
+    <circle cx="366" cy="143" r="2.5"/>
+    <circle cx="414" cy="256" r="2.5"/>
+    <circle cx="366" cy="369" r="2.5"/>
+    <circle cx="256" cy="411" r="2.5"/>
+    <circle cx="146" cy="369" r="2.5"/>
+    <circle cx="98"  cy="256" r="2.5"/>
+    <circle cx="146" cy="143" r="2.5"/>
+  </g>
+</svg>

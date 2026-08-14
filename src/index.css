@@ -1,0 +1,876 @@
+@import "tailwindcss";
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #000;
+    color: #fff;
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  /* Intro screen */
+  .intro-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 7, 14, 0.34);
+    cursor: pointer;
+    transition: opacity 0.66s cubic-bezier(0.4, 0, 0.2, 1), transform 0.66s cubic-bezier(0.4, 0, 0.2, 1);
+    isolation: isolate;
+    will-change: opacity, transform;
+  }
+
+  .intro-screen.fade-out {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+  }
+
+  .intro-background {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-position: center 30%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transform: scale(1.02);
+  }
+
+  .hero-background {
+    background-position: 55% 30%;
+  }
+
+  .intro-wash {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgba(4, 6, 16, 0.54), rgba(7, 9, 18, 0.24) 62%, rgba(7, 8, 16, 0.4)),
+      linear-gradient(0deg, rgba(1, 2, 8, 0.32), rgba(35, 9, 28, 0.08));
+  }
+
+  .intro-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    will-change: transform, opacity;
+  }
+
+  .intro-pulse-btn {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #24242b 0%, #090a0f 54%, #000 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 0 24px rgba(16, 20, 36, 0.72), inset 0 0 16px rgba(0,0,0,0.8);
+    animation: pulse-glow 2s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .intro-pulse-btn::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(105, 118, 160, 0.32);
+    animation: pulse-ring 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.045); }
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 0; }
+  }
+
+  .intro-venom-web {
+    font-size: 1.75rem;
+    line-height: 1;
+    filter: grayscale(1) brightness(1.8) contrast(1.35) drop-shadow(0 0 5px rgba(160, 175, 220, 0.28));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     Spider-Man: Brand New Day — exact title treatment
+     • Main "SPIDER-MAN" line  → Good Times (MCU font, geometric wide caps)
+     • Subtitle "One More Song" → Nunito ExtraBold Italic (golden, rounded)
+     • Tagline                  → Nunito Light Italic (warm cream)
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* Shared base — block display */
+  @font-face {
+    font-family: 'Speedy';
+    src: url('https://fontlot.com/wp-content/uploads/2022/12/speedyregular-7bloe.ttf') format('truetype');
+    font-display: swap;
+  }
+  .spidey-title {
+    text-transform: uppercase;
+    display: block;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── "SPIDER-MAN:" ── bold red face + deep blue 3-D extrusion + dark outline */
+  .spidey-title-main {
+    font-family: 'Speedy', 'Orbitron', 'Good Times', 'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-weight: 400;           /* Good Times has only one weight — it's naturally heavy */
+    font-style: normal;
+    letter-spacing: 0.06em;
+    line-height: 1.0;
+
+    /* Marvel movie red face */
+    color: #d91b22;
+
+    /* Layer 1 – thin black outline all around (simulated with stacked shadows) */
+    /* Layer 2 – royal-blue depth / extrusion going bottom-right (like the movie)  */
+    /* Layer 3 – dark ambient drop                                                  */
+    text-shadow:
+      /* — black outline ring — */
+       1px  0    0   #0a0a0a,
+      -1px  0    0   #0a0a0a,
+       0    1px  0   #0a0a0a,
+       0   -1px  0   #0a0a0a,
+       1px  1px  0   #0a0a0a,
+      -1px -1px  0   #0a0a0a,
+       1px -1px  0   #0a0a0a,
+      -1px  1px  0   #0a0a0a,
+      /* — royal-blue 3-D depth extrusion (lower-right) — */
+       2px  2px  0   #1a2db5,
+       3px  3px  0   #1a2db5,
+       4px  4px  0   #142299,
+       5px  5px  0   #0e1878,
+       6px  6px  0   #0a1260,
+       7px  7px  0   #070d47,
+      /* — dark edge on the extrusion — */
+       7px  7px  1px #030820,
+      /* — ambient shadow to lift off background — */
+       4px 10px 12px rgba(0,0,0,0.65);
+
+    -webkit-text-stroke: 1.8px #080808;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.55));
+  }
+
+  /* ── "One More Song" subtitle ── golden italic, matches "Brand New Day" line */
+  .spidey-subtitle {
+    font-family: 'Caveat', 'Nunito', 'Varela Round', 'Trebuchet MS', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+    text-transform: uppercase;
+
+    /* Warm movie gold — matches the Brand New Day subtitle exactly */
+    color: #f4c224;
+
+    text-shadow:
+      /* dark base outline */
+       1px  0    0   #1a0e00,
+      -1px  0    0   #1a0e00,
+       0    1px  0   #1a0e00,
+       0   -1px  0   #1a0e00,
+      /* amber depth */
+       1px  1px  0   #7a5800,
+       2px  2px  0   #5e4300,
+       3px  3px  0   #3d2c00,
+      /* drop */
+       2px  5px  8px rgba(0,0,0,0.55);
+
+    -webkit-text-stroke: 0.6px #2a1800;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.45));
+  }
+
+  /* ── Tagline ── elegant, warm, quiet */
+  .spidey-tagline {
+    font-family: 'Caveat', 'Nunito', 'Trebuchet MS', sans-serif;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 230, 170, 0.68);
+  }
+
+  /* ── Mobile: reduce extrusion depth slightly ── */
+  @media (max-width: 640px) {
+    .spidey-title-main {
+      text-shadow:
+         1px  0    0   #0a0a0a,
+        -1px  0    0   #0a0a0a,
+         0    1px  0   #0a0a0a,
+         0   -1px  0   #0a0a0a,
+         1px  1px  0   #0a0a0a,
+        -1px -1px  0   #0a0a0a,
+         2px  2px  0   #1a2db5,
+         3px  3px  0   #142299,
+         4px  4px  0   #0a1260,
+         4px  8px  9px rgba(0,0,0,0.6);
+      -webkit-text-stroke: 1.2px #080808;
+    }
+    .spidey-subtitle {
+      text-shadow:
+         1px  0    0   #1a0e00,
+        -1px  0    0   #1a0e00,
+         0    1px  0   #1a0e00,
+         1px  1px  0   #7a5800,
+         2px  2px  0   #3d2c00,
+         2px  4px  6px rgba(0,0,0,0.5);
+    }
+  }
+
+  /* Equalizer */
+  .equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 18px;
+  }
+
+  .eq-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: linear-gradient(to top, #e63946, #ff6b6b);
+    transition: height 0.15s ease;
+  }
+
+  .eq-bar.active {
+    animation: eq-bounce var(--eq-speed, 0.4s) ease-in-out infinite alternate;
+  }
+
+  @keyframes eq-bounce {
+    0% { height: var(--eq-min, 4px); }
+    100% { height: var(--eq-max, 16px); }
+  }
+
+  /* Spinning disc */
+  .disc-spin {
+    animation: spin-disc 4s linear infinite;
+    will-change: transform;
+  }
+
+  .disc-spin.paused {
+    animation-play-state: paused;
+  }
+
+  @keyframes spin-disc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Glass card */
+  .glass-card {
+    background: rgba(10, 10, 20, 0.61);
+    backdrop-filter: blur(16px) saturate(1.14);
+    -webkit-backdrop-filter: blur(16px) saturate(1.14);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 0 1px rgba(230, 57, 70, 0.05);
+  }
+
+  .hero-copy {
+    min-width: 0;
+    transform: translateY(-4vh);
+  }
+
+  /* Popover */
+  .popover-enter {
+    animation: popover-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: transform, opacity;
+  }
+
+  .popover-exit {
+    animation: popover-out 0.2s ease-in forwards;
+  }
+
+  @keyframes popover-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes popover-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(8px) scale(0.95); }
+  }
+
+  /* Web decoration */
+  .web-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
+  /* Button hover */
+  .btn-hover {
+    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  }
+  .btn-hover:hover {
+    transform: scale(1.08);
+  }
+  .btn-hover:active {
+    transform: scale(0.95);
+  }
+
+  /* Progress bar */
+  .progress-track {
+    position: relative;
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    cursor: pointer;
+    overflow: visible;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e63946, #ff6b6b);
+    border-radius: 2px;
+    position: relative;
+    transition: width 0.1s linear;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(230, 57, 70, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .progress-track:hover .progress-fill::after {
+    opacity: 1;
+  }
+
+  .progress-slider {
+    --progress: 0%;
+    height: 18px;
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    touch-action: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .progress-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #e63946 0 var(--progress), rgba(255,255,255,0.14) var(--progress) 100%);
+  }
+
+  .progress-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.14);
+  }
+
+  .progress-slider::-moz-range-progress {
+    height: 4px;
+    border-radius: 999px;
+    background: #e63946;
+  }
+
+  .progress-slider::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 7px rgba(230,57,70,0.55);
+    transition: transform 100ms ease;
+  }
+
+  .progress-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 7px rgba(230,57,70,0.55);
+  }
+
+  .progress-slider:active::-webkit-slider-thumb {
+    transform: scale(1.16);
+  }
+
+  /* Scrollbar for playlist */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(230, 57, 70, 0.3);
+    border-radius: 2px;
+  }
+
+  /* Main page fade in */
+  .main-fade-in {
+    animation: main-in 1s ease-out forwards;
+  }
+
+  @keyframes main-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Search results highlight */
+  .search-result-item {
+    transition: background 0.2s;
+  }
+  .search-result-item:hover {
+    background: rgba(230, 57, 70, 0.1);
+  }
+
+  /* Curated playlist browser */
+  .playlist-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .playlist-collection-button {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.035);
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+
+  .playlist-collection-button:active {
+    transform: scale(0.98);
+  }
+
+  .playlist-collection-button.is-selected {
+    border-color: rgba(230, 57, 70, 0.38);
+    background: linear-gradient(135deg, rgba(230, 57, 70, 0.13), rgba(26, 35, 126, 0.12));
+  }
+
+  .playlist-monogram {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .playlist-monogram.angrezi {
+    background: linear-gradient(145deg, #df3342, #142274 72%);
+  }
+
+  .playlist-monogram.chatpata {
+    background: linear-gradient(145deg, #f07838, #bf1d33 72%);
+  }
+
+  .playlist-monogram.haryanvi {
+    background: linear-gradient(145deg, #d04330, #111c55 72%);
+  }
+
+  .playlist-monogram.bhojpuri {
+    background: linear-gradient(145deg, #ff5a2a, #7a1024 72%);
+  }
+
+  .playlist-monogram.honeysingh {
+    background: linear-gradient(145deg, #ffd700, #b8860b 72%);
+  }
+
+  .playlist-monogram.gururandhawa {
+    background: linear-gradient(145deg, #00ced1, #008b8b 72%);
+  }
+
+  .playlist-monogram.badshah {
+    background: linear-gradient(145deg, #f12d46, #171b68 72%);
+  }
+
+  .playlist-monogram.karanaujla {
+    background: linear-gradient(145deg, #f08a2b, #212121 72%);
+  }
+
+  .playlist-monogram.shubh {
+    background: linear-gradient(145deg, #21c05d, #0f2847 72%);
+  }
+
+  .playlist-monogram.nehakakkar {
+    background: linear-gradient(145deg, #ff4f9a, #8c1a70 72%);
+  }
+
+  .playlist-monogram.tonykakkar {
+    background: linear-gradient(145deg, #7b61ff, #13215a 72%);
+  }
+
+  .playlist-monogram.romantic {
+    background: linear-gradient(145deg, #d84b6c, #5c1744 72%);
+  }
+
+  /* Make collection list scrollable vertically/horizontally if there are 6+ playlists */
+  .playlist-collection-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    touch-action: pan-x;
+    contain: layout paint;
+  }
+
+  .playlist-collection-grid::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .playlist-collection-grid::-webkit-scrollbar-thumb {
+    background: rgba(230, 57, 70, 0.2);
+    border-radius: 1.5px;
+  }
+
+  .playlist-collection-button {
+    flex: 0 0 160px;
+    scroll-snap-align: start;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .playlist-track-list {
+    max-height: min(35dvh, 18rem);
+    padding-right: 0.15rem;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    contain: layout paint style;
+  }
+
+  .playlist-track-button {
+    display: flex;
+    width: 100%;
+    min-height: 2.5rem;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 0.65rem;
+    transition: color 120ms ease, background-color 120ms ease, transform 100ms ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .playlist-collection-button:hover {
+      border-color: rgba(230, 57, 70, 0.28);
+      background: rgba(230, 57, 70, 0.07);
+    }
+
+    .playlist-track-button:hover {
+      background: rgba(255, 255, 255, 0.055);
+    }
+  }
+
+  .playlist-track-button:active {
+    transform: scale(0.99);
+  }
+
+  .playlist-popover .glass-card {
+    backdrop-filter: blur(11px) saturate(1.08);
+    -webkit-backdrop-filter: blur(11px) saturate(1.08);
+  }
+
+  .playlist-track-button.is-current {
+    background: linear-gradient(90deg, rgba(230, 57, 70, 0.13), rgba(26, 35, 126, 0.06));
+  }
+
+  .playlist-track-button .equalizer {
+    height: 13px;
+    transform: scale(0.72);
+  }
+
+  .track-loader {
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-top-color: #e63946;
+    border-radius: 50%;
+    animation: spin-disc 700ms linear infinite;
+  }
+
+  @media (max-width: 640px) {
+    .intro-screen {
+      padding: max(1rem, env(safe-area-inset-top, 1rem)) max(1rem, env(safe-area-inset-right, 1rem)) max(1rem, env(safe-area-inset-bottom, 1rem)) max(1rem, env(safe-area-inset-left, 1rem));
+    }
+
+    .intro-background {
+      background-position: 64% 30%;
+    }
+
+    .hero-background {
+      background-position: 64% 34%;
+    }
+
+    .hero-copy {
+      max-width: 66% !important;
+    }
+
+    .glass-card {
+      background: rgba(10, 10, 20, 0.55);
+      backdrop-filter: blur(12px) saturate(1.1);
+      -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    }
+  }
+
+  @media (max-width: 640px) and (orientation: landscape) {
+    .hero-background,
+    .intro-background {
+      background-position: 60% 32%;
+    }
+
+    .hero-copy {
+      max-width: 48% !important;
+    }
+
+    .playlist-track-list {
+      max-height: 26dvh;
+    }
+  }
+
+  @media (max-height: 560px) {
+    .playlist-popover .glass-card {
+      padding: 0.7rem;
+    }
+
+    .playlist-collection-grid {
+      margin-bottom: 0.45rem;
+    }
+
+    .playlist-collection-button {
+      padding: 0.35rem;
+    }
+
+    .playlist-monogram {
+      width: 1.7rem;
+      height: 1.7rem;
+    }
+
+    .playlist-track-list {
+      max-height: 20dvh;
+    }
+
+    .playlist-track-button {
+      min-height: 2.15rem;
+      padding-block: 0.2rem;
+    }
+  }
+
+  /* ── Lightweight Spider-Man extras ── */
+  .top-brand,
+  .maker-credit {
+    position: absolute;
+    top: max(0.7rem, env(safe-area-inset-top, 0.7rem));
+    z-index: 20;
+    margin: 0;
+    color: rgba(255, 82, 92, 0.66);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+    padding: 0.3rem 0.45rem;
+    border-radius: 0.45rem;
+    background: linear-gradient(135deg, rgba(38, 5, 12, 0.34), rgba(4, 5, 13, 0.26));
+    border: 1px solid rgba(220, 48, 65, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .top-brand {
+    left: max(0.85rem, env(safe-area-inset-left, 0.85rem));
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    pointer-events: none;
+  }
+
+  .maker-credit {
+    right: max(0.85rem, env(safe-area-inset-right, 0.85rem));
+  }
+
+  .maker-credit span {
+    color: rgba(255, 82, 92, 0.72);
+  }
+
+  .maker-credit a {
+    color: rgba(245, 194, 36, 0.82);
+    font-weight: 700;
+    pointer-events: auto;
+    text-decoration: none;
+    transition: color 140ms ease, text-shadow 140ms ease;
+  }
+
+  .maker-credit a:hover,
+  .maker-credit a:focus-visible {
+    color: rgba(255, 214, 74, 1);
+    text-shadow: 0 0 8px rgba(245, 194, 36, 0.32);
+    outline: none;
+  }
+
+  .one-more-counter {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.35rem);
+    transform: translateX(-50%);
+    margin: 0;
+    color: rgba(255, 210, 150, 0.55);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .player-shell {
+    position: relative;
+    width: 100%;
+    max-width: min(96vw, 560px);
+  }
+
+  .player-shell.sense-on {
+    animation: sense-pulse 1.6s ease-out 1;
+  }
+
+  .spidey-sense-toast {
+    position: absolute;
+    left: 0.85rem;
+    top: -2.15rem;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    pointer-events: none;
+    animation: sense-toast 1.6s ease-out 1 forwards;
+  }
+
+  .spidey-sense-toast strong {
+    color: rgba(255, 92, 92, 0.9);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+  }
+
+  .spidey-sense-toast em {
+    color: rgba(170, 190, 255, 0.72);
+    font-size: 8px;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .thwip-flash {
+    position: absolute;
+    inset: -8px;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 1.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 0 0 1px rgba(230, 57, 70, 0.18),
+      inset 0 0 0 1px rgba(80, 110, 255, 0.12);
+    background:
+      linear-gradient(115deg, transparent 42%, rgba(255,255,255,0.18) 50%, transparent 58%),
+      radial-gradient(circle at 18% 20%, rgba(230,57,70,0.16), transparent 28%),
+      radial-gradient(circle at 84% 78%, rgba(80,110,255,0.14), transparent 30%);
+    animation: thwip-web 420ms ease-out 1 forwards;
+  }
+
+  @keyframes sense-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.0); }
+    18% { box-shadow: 0 0 0 6px rgba(230, 57, 70, 0.16), 0 0 18px rgba(50, 80, 220, 0.18); }
+    100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+  }
+
+  @keyframes sense-toast {
+    0% { opacity: 0; transform: translateY(4px); }
+    14% { opacity: 1; transform: translateY(0); }
+    72% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-2px); }
+  }
+
+  @keyframes thwip-web {
+    0% { opacity: 0; transform: scale(0.94); }
+    28% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); }
+  }
+
+  @media (max-width: 640px) {
+    .top-brand,
+    .maker-credit {
+      font-size: 8px;
+    }
+
+    .one-more-counter {
+      font-size: 7px;
+    }
+
+    .spidey-sense-toast {
+      top: -1.95rem;
+      left: 0.65rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
