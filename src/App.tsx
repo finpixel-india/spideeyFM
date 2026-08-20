@@ -1,6 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import Draggable from 'react-draggable';
+import anyAscii from 'any-ascii';
 
 const BACKGROUND_IMAGE = '/images/background.png';
+
+/* ─── LRC Parser ─── */
+function parseLrc(lrc: string): { time: number; text: string }[] {
+  return lrc
+    .split('\n')
+    .map(line => {
+      const match = line.match(/^\[(\d+):(\d+\.\d+)\](.*)/);
+      if (!match) return null;
+      const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
+      const text = match[3].trim();
+      return text ? { time, text } : null;
+    })
+    .filter(Boolean) as { time: number; text: string }[];
+}
 
 /* ─── Types ─── */
 interface Song {
@@ -37,9 +53,15 @@ interface SearchResult {
 /* ─── API helper ─── */
 const NEPTUNE_BASE = 'https://nepotuneapi.vercel.app';
 
+/** Route all Neptune fetches through our Cloudflare Pages proxy to avoid CORS */
+function neptuneProxy(path: string): Promise<Response> {
+  const fullUrl = `${NEPTUNE_BASE}${path}`;
+  return fetch(`/api/proxy?url=${encodeURIComponent(fullUrl)}`);
+}
+
 async function searchSongs(query: string): Promise<Song[]> {
   try {
-    const res = await fetch(`${NEPTUNE_BASE}/api/search/songs?query=${encodeURIComponent(query)}`);
+    const res = await neptuneProxy(`/api/search/songs?query=${encodeURIComponent(query)}`);
     const json = await res.json();
     if (!json.success || !json.data?.results) return [];
     return json.data.results.slice(0, 12).map((r: SearchResult) => ({
@@ -54,6 +76,7 @@ async function searchSongs(query: string): Promise<Song[]> {
     return [];
   }
 }
+
 
 /* ─── Default queue and curated playlists ─── */
 const SUNFLOWER_STARTER: Song = {
@@ -821,6 +844,10 @@ export default function App() {
   const [oneMoreCount, setOneMoreCount] = useState(() => Number(saved?.oneMoreCount) || 1);
   const [showSpideySense, setShowSpideySense] = useState(false);
   const [showThwip, setShowThwip] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [lyrics, setLyrics] = useState<{ time: number; text: string }[] | null>(null);
+  const [lyricsLoading, setLyricsLoading] = useState(false);
+  const [lyricsError, setLyricsError] = useState('');
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const searchPopoverRef = useRef<HTMLDivElement>(null);
@@ -839,6 +866,73 @@ export default function App() {
 
   const currentSong = playlist[currentIdx] || DEFAULT_PLAYLIST[0];
   const selectedCollection = CURATED_PLAYLISTS.find(({ id }) => id === selectedCollectionId) || CURATED_PLAYLISTS[0];
+
+  /* ─── Active lyric line index ─── */
+  const activeLineIndex = useMemo(() => {
+    if (!lyrics || lyrics.length === 0) return 0;
+    let idx = 0;
+    for (let i = 0; i < lyrics.length; i++) {
+      if (currentTime >= lyrics[i].time) idx = i;
+      else break;
+    }
+    return idx;
+  }, [lyrics, currentTime]);
+
+  /* ─── Lyrics Fetcher — Waterfall Strategy ─── */
+  useEffect(() => {
+    if (!showLyrics || !currentSong) return;
+    let active = true;
+    setLyricsLoading(true);
+    setLyricsError('');
+    setLyrics(null);
+
+    const fetchLyrics = async () => {
+      try {
+        // Stage 1: Exact match
+        const exactRes = await fetch(
+          `https://lrclib.net/api/get?track_name=${encodeURIComponent(currentSong.name)}&artist_name=${encodeURIComponent(currentSong.artist)}`
+        );
+        if (exactRes.ok) {
+          const data = await exactRes.json();
+          if (data?.syncedLyrics) {
+            if (active) { setLyrics(parseLrc(data.syncedLyrics)); setLyricsError(''); setLyricsLoading(false); }
+            return;
+          }
+        }
+
+        // Stage 2: Fuzzy search fallback
+        const searchRes = await fetch(
+          `https://lrclib.net/api/search?q=${encodeURIComponent(currentSong.name + ' ' + currentSong.artist)}`
+        );
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          if (Array.isArray(searchData)) {
+            const syncedResult = searchData.find((item: any) => item.syncedLyrics);
+            if (syncedResult) {
+              if (active) { setLyrics(parseLrc(syncedResult.syncedLyrics)); setLyricsError(''); setLyricsLoading(false); }
+              return;
+            }
+          }
+        }
+
+        // Stage 3: Nothing found
+        if (active) {
+          setLyrics(null);
+          setLyricsError('No synced lyrics available.');
+          setLyricsLoading(false);
+        }
+      } catch {
+        if (active) {
+          setLyrics(null);
+          setLyricsError('Failed to fetch lyrics.');
+          setLyricsLoading(false);
+        }
+      }
+    };
+
+    fetchLyrics();
+    return () => { active = false; };
+  }, [showLyrics, currentSong]);
 
   const triggerSongFx = useCallback((songId: string, countChange: boolean) => {
     if (lastSongIdRef.current === songId) return;
@@ -1219,6 +1313,61 @@ export default function App() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
 
 
+          {/* ──── Floating Draggable Lyrics ──── */}
+          {showLyrics && (
+            <Draggable handle=".lyrics-drag-handle">
+              <div
+                className="absolute z-[100] left-4 bottom-32 flex flex-col items-center justify-center pointer-events-auto"
+                style={{ width: 'min(90vw, 500px)', cursor: 'grab' }}
+              >
+                {/* Invisible drag handle — covers entire block */}
+                <div className="lyrics-drag-handle w-full absolute inset-0 z-10" />
+
+                {lyricsLoading ? (
+                  <p className="text-white/50 text-sm text-center px-4 relative z-20 pointer-events-none">
+                    Loading lyrics...
+                  </p>
+                ) : lyricsError ? (
+                  <p className="text-white/50 text-sm text-center px-4 relative z-20 pointer-events-none">
+                    {lyricsError}
+                  </p>
+                ) : lyrics ? (
+                  <div
+                    className="relative w-full h-[150px] overflow-hidden flex flex-col items-center pointer-events-none drop-shadow-md"
+                  >
+                    {lyrics.map((line, i) => {
+                      const offset = i - activeLineIndex;
+                      if (offset < -2 || offset > 2) return null;
+                      const isCenter = offset === 0;
+                      return (
+                        <p
+                          key={i}
+                          className="absolute w-full text-center font-medium px-4"
+                          style={{
+                            height: '40px',
+                            top: '55px',
+                            transition: 'all 700ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+                            transform: `translateY(${offset * 40}px) scale(${isCenter ? 1 : 0.95})`,
+                            transformOrigin: 'center center',
+                            opacity: isCenter ? 1 : (Math.abs(offset) === 1 ? 0.4 : 0),
+                            fontWeight: isCenter ? 800 : 500,
+                            fontSize: isCenter ? '1.25rem' : '1rem',
+                            color: 'white',
+                            textShadow: isCenter
+                              ? '0 0 15px rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.8)'
+                              : '0 1px 4px rgba(0,0,0,0.8)',
+                          }}
+                        >
+                          {anyAscii(line.text)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            </Draggable>
+          )}
+
           <WebDecoration />
 
           {/* Content container */}
@@ -1463,6 +1612,18 @@ export default function App() {
                         className={`btn-hover p-1.5 rounded-lg transition-colors ${showPlaylist ? 'text-red-400 bg-red-500/10' : 'text-white/40 hover:text-white/70'}`}
                       >
                         <ListIcon />
+                      </button>
+                      <button
+                        onClick={() => setShowLyrics(prev => !prev)}
+                        aria-label="Toggle Lyrics"
+                        title="Toggle Lyrics"
+                        className={`btn-hover p-1.5 rounded-lg transition-colors ${showLyrics ? 'text-red-400 bg-red-500/10' : 'text-white/40 hover:text-white/70'}`}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18V5l12-2v13"/>
+                          <circle cx="6" cy="18" r="3"/>
+                          <circle cx="18" cy="16" r="3"/>
+                        </svg>
                       </button>
                     </div>
 
