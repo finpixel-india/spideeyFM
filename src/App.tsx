@@ -51,27 +51,12 @@ interface SearchResult {
 }
 
 /* ─── API helper ─── */
-const NEPTUNE_BASE = 'https://nepotuneapi.vercel.app';
-
-/** Route all Neptune fetches through our Cloudflare Pages proxy to avoid CORS */
-function neptuneProxy(path: string): Promise<Response> {
-  const fullUrl = `${NEPTUNE_BASE}${path}`;
-  return fetch(`/api/proxy?url=${encodeURIComponent(fullUrl)}`);
-}
-
 async function searchSongs(query: string): Promise<Song[]> {
   try {
-    const res = await neptuneProxy(`/api/search/songs?query=${encodeURIComponent(query)}`);
+    const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
     const json = await res.json();
-    if (!json.success || !json.data?.results) return [];
-    return json.data.results.slice(0, 12).map((r: SearchResult) => ({
-      id: r.id,
-      name: r.name,
-      artist: r.artists?.primary?.map((a: { name: string }) => a.name).join(', ') || 'Unknown',
-      image: r.image?.[2]?.url || r.image?.[1]?.url || r.image?.[0]?.url || '',
-      downloadUrl: r.downloadUrl?.[4]?.url || r.downloadUrl?.[3]?.url || r.downloadUrl?.[2]?.url || r.downloadUrl?.[0]?.url || '',
-      duration: r.duration || 0,
-    }));
+    if (!json.success || !Array.isArray(json.data?.results)) return [];
+    return json.data.results;
   } catch {
     return [];
   }
