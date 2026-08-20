@@ -39,55 +39,38 @@ export async function onRequest(context) {
     const searchData = await searchRes.json();
     const rawResults = searchData.results || [];
 
-    // 2. Resolve media URLs concurrently
-    const results = await Promise.all(
-      rawResults.map(async (song) => {
-        const encryptedUrl = song.more_info?.encrypted_media_url;
-        let downloadUrl = '';
+    // 2. Format results
+    const results = rawResults.map((song) => {
+      const encryptedUrl = song.more_info?.encrypted_media_url;
+      const downloadUrl = encryptedUrl ? `/api/stream?url=${encodeURIComponent(encryptedUrl)}` : '';
 
-        if (encryptedUrl) {
-          try {
-            const authUrl = `https://www.jiosaavn.com/api.php?__call=song.generateAuthToken&url=${encodeURIComponent(encryptedUrl)}&bitrate=320&api_version=4&_format=json&ctx=web6dot0`;
-            const authRes = await fetch(authUrl, {
-              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-            });
-            const authData = await authRes.json();
-            if (authData.status === 'success' && authData.auth_url) {
-              downloadUrl = authData.auth_url;
-            }
-          } catch {
-            // fallback if auth token generation fails
-          }
-        }
+      // High-res album artwork
+      let image = song.image || '';
+      if (image.includes('150x150')) {
+        image = image.replace('150x150', '500x500');
+      }
 
-        // High-res album artwork
-        let image = song.image || '';
-        if (image.includes('150x150')) {
-          image = image.replace('150x150', '500x500');
-        }
+      // Artist name formatting
+      const primaryArtists = song.more_info?.artistMap?.primary_artists?.map((a) => a.name).join(', ') || '';
+      const artists = primaryArtists || song.more_info?.music || song.subtitle?.split('-')[0]?.trim() || 'Unknown';
 
-        // Artist name formatting
-        const primaryArtists = song.more_info?.artistMap?.primary_artists?.map((a) => a.name).join(', ') || '';
-        const artists = primaryArtists || song.more_info?.music || song.subtitle?.split('-')[0]?.trim() || 'Unknown';
+      // Title cleaning (decode HTML entities if any)
+      const name = (song.title || '')
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&#039;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
 
-        // Title cleaning (decode HTML entities if any)
-        const name = (song.title || '')
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-          .replace(/&#039;/g, "'")
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>');
-
-        return {
-          id: song.id,
-          name,
-          artist: artists,
-          image,
-          downloadUrl,
-          duration: Number(song.more_info?.duration || 0),
-        };
-      })
-    );
+      return {
+        id: song.id,
+        name,
+        artist: artists,
+        image,
+        downloadUrl,
+        duration: Number(song.more_info?.duration || 0),
+      };
+    });
 
     return new Response(
       JSON.stringify({
