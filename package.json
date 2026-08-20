@@ -11,6 +11,7 @@
   "dependencies": {
     "any-ascii": "^0.3.3",
     "clsx": "2.1.1",
+    "crypto-js": "^4.2.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-draggable": "^4.7.1",

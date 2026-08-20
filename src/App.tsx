@@ -51,15 +51,33 @@ interface SearchResult {
 }
 
 /* ─── API helper ─── */
+const API_BASES = [
+  "https://saavn.dev/api/search/songs?query=",
+  "https://jiosavan-azure.vercel.app/api/search/songs?query=",
+  "https://nepotuneapi.vercel.app/api/search/songs?query=",
+];
+
 async function searchSongs(query: string): Promise<Song[]> {
-  try {
-    const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-    const json = await res.json();
-    if (!json.success || !Array.isArray(json.data?.results)) return [];
-    return json.data.results;
-  } catch {
-    return [];
+  for (const base of API_BASES) {
+    try {
+      const res = await fetch(`${base}${encodeURIComponent(query)}`);
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (!json.success || !json.data?.results) continue;
+      
+      return json.data.results.slice(0, 12).map((r: SearchResult) => ({
+        id: r.id,
+        name: r.name,
+        artist: r.artists?.primary?.map((a: { name: string }) => a.name).join(', ') || 'Unknown',
+        image: r.image?.[2]?.url || r.image?.[1]?.url || r.image?.[0]?.url || '',
+        downloadUrl: r.downloadUrl?.[4]?.url || r.downloadUrl?.[3]?.url || r.downloadUrl?.[2]?.url || r.downloadUrl?.[0]?.url || '',
+        duration: r.duration || 0,
+      }));
+    } catch {
+      // Ignore and try the next mirror
+    }
   }
+  return [];
 }
 
 
